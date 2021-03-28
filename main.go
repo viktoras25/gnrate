@@ -14,6 +14,15 @@ import (
 
 func main() {
 	app := cli.App{
+		Name:        "gnrate",
+		Description: "Genrate fake data",
+		Authors: []*cli.Author{
+			&cli.Author{
+				Name: "Viktoras Bezaras",
+			},
+		},
+		Usage:     "Generates fake data",
+		UsageText: "gnrate [count] [language] subject",
 		Action: func(c *cli.Context) error {
 			subject := "name"
 			count := 1
