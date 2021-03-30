@@ -1,10 +1,8 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -17,70 +15,25 @@ func main() {
 		Name:        "gnrate",
 		Description: "Genrate fake data",
 		Authors: []*cli.Author{
-			&cli.Author{
+			{
 				Name: "Viktoras Bezaras",
 			},
 		},
 		Usage:     "Generates fake data",
 		UsageText: "gnrate [count] [language] subject",
 		Action: func(c *cli.Context) error {
-			subject := "name"
-			count := 1
-			language := "english"
-
-			args := c.Args()
-			argsSlice := args.Slice()
-
-			if !args.Present() {
-				return errors.New("at least one argument is required")
+			configuration, err := parse(c.Args().Slice())
+			if err != nil {
+				fmt.Println(err.Error())
 			}
 
-			subject, argsSlice = cutLast(argsSlice)
-
-			if len(argsSlice) > 0 {
-				argument := ""
-				argument, argsSlice = cutLast(argsSlice)
-
-				if isNumeric(argument) {
-					count, _ = strconv.Atoi(argument)
-				} else {
-					language = argument
-				}
-			}
-
-			if len(argsSlice) > 0 {
-				argument := ""
-				argument, _ = cutLast(argsSlice)
-
-				if isNumeric(argument) {
-					count, _ = strconv.Atoi(argument)
-				}
-			}
-
-			generate(subject, language, count)
+			generate(configuration)
 
 			return nil
 		},
 	}
 
 	app.Run(os.Args)
-}
-
-func cutLast(arguments []string) (string, []string) {
-	if len(arguments) == 0 {
-		return "", []string{}
-	}
-
-	lastElement := arguments[len(arguments)-1]
-	remainingSlice := arguments[:len(arguments)-1]
-
-	return lastElement, remainingSlice
-}
-
-func isNumeric(str string) bool {
-	_, err := strconv.Atoi(str)
-
-	return err == nil
 }
 
 func setLocale(language string) {
@@ -113,13 +66,13 @@ func setLocale(language string) {
 	}
 }
 
-func generate(subject string, language string, count int) {
+func generate(c *Configuration) {
 
-	setLocale(language)
+	setLocale(c.language)
 
-	subject = strings.ToLower(subject)
+	subject := strings.ToLower(c.subject)
 
-	for i := 0; i < count; i += 1 {
+	for i := 0; i < c.count; i += 1 {
 		switch subject {
 		case "name", "names":
 			fmt.Println(faker.Name())
